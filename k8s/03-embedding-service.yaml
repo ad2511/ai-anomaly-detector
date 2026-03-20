@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-service
+  namespace: ai-log-anomaly
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: embedding-service
+  template:
+    metadata:
+      labels:
+        app: embedding-service
+    spec:
+      containers:
+        - name: embedding-service
+          image: ai-log-anomaly-system-embedding-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 4100
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo.ai-log-anomaly.svc.cluster.local:27017/ai-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: embedding-service
+  namespace: ai-log-anomaly
+spec:
+  selector:
+    app: embedding-service
+  ports:
+    - name: metrics
+      port: 4100
+      targetPort: 4100

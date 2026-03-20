@@ -1,0 +1,40 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  ingest-service:
+    build: ./ingest-service
+    container_name: ingest-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai-logs
+      EMBEDDING_SERVICE_URL: http://embedding-service:4000
+
+  embedding-service:
+    build: ./embedding-service
+    container_name: embedding-service
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai-logs
+
+  anomaly-service:
+    build: ./anomaly-service
+    container_name: anomaly-service
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai-logs
+
+volumes:
+  mongo_data:

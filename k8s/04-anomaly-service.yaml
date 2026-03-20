@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anomaly-service
+  namespace: ai-log-anomaly
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anomaly-service
+  template:
+    metadata:
+      labels:
+        app: anomaly-service
+    spec:
+      containers:
+        - name: anomaly-service
+          image: ai-log-anomaly-system-anomaly-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5100
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo.ai-log-anomaly.svc.cluster.local:27017/ai-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anomaly-service
+  namespace: ai-log-anomaly
+spec:
+  selector:
+    app: anomaly-service
+  ports:
+    - name: metrics
+      port: 5100
+      targetPort: 5100

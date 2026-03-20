@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-service
+  namespace: ai-log-anomaly
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingest-service
+  template:
+    metadata:
+      labels:
+        app: ingest-service
+    spec:
+      containers:
+        - name: ingest-service
+          image: ai-log-anomaly-system-ingest-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo.ai-log-anomaly.svc.cluster.local:27017/ai-logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-service
+  namespace: ai-log-anomaly
+spec:
+  selector:
+    app: ingest-service
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: NodePort
